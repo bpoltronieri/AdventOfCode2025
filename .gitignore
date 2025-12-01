@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+Input/*
+!Input/.gitkeep
+
 # User-specific files
 *.rsuser
 *.suo
