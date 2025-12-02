@@ -22,7 +22,6 @@ namespace AoC2025.Days
                     if (nDigits % 2 == 0 && IdStr[..(nDigits / 2)] == IdStr[(nDigits/2)..])
                         answer += ID;                    
                 }
-
             }
             return answer.ToString();
         }
@@ -57,7 +56,6 @@ namespace AoC2025.Days
                     if (invalid)
                         answer += ID;                    
                 }
-
             }
             return answer.ToString();
         }

@@ -6,7 +6,7 @@ namespace AoC2025.Tests.Days
     public class Day02Tests
     {
         [Fact]
-        public void Day02Test2()
+        public void Day02Test1()
         {
             // arrange
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidDataException();
