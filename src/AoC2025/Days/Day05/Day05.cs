@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 
 namespace AoC2025.Days
 {
