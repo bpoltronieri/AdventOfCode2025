@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace AoC2025
 {
@@ -32,8 +33,13 @@ namespace AoC2025
                 
                 string inputFile = Directory.GetFiles(path + @"\Input", dayName + ".txt")[0] ?? throw new InvalidOperationException("Could not find input file");
 
+                Stopwatch stopwatch1 = Stopwatch.StartNew(); 
                 solution = (IDay?)Activator.CreateInstance(dayType, inputFile);
-                if (solution == null) throw new InvalidOperationException("Could not load solution");
+                stopwatch1.Stop();
+                if (solution == null) 
+                    throw new InvalidOperationException("Could not load solution");
+                else
+                    Console.WriteLine("Time to load input: {0}", stopwatch1.Elapsed);
             }
             catch
             {
@@ -56,6 +62,7 @@ namespace AoC2025
             }
 
             string answer = "";
+            Stopwatch stopwatch2 = Stopwatch.StartNew(); 
             switch (part)
             {
                 case 1:
@@ -65,7 +72,9 @@ namespace AoC2025
                     answer = solution.PartTwo();
                     break;
             }
-            Console.WriteLine(answer);
+            stopwatch2.Stop();
+            Console.WriteLine("Answer: " + answer);
+            Console.WriteLine("Time elapsed: {0}", stopwatch2.Elapsed);
         }
     }
 }
