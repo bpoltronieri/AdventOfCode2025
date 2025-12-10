@@ -4,7 +4,7 @@ namespace AoC2025.Days
     {
         // next time, use or write a class for a 2D vector.
         // was lazy and kept using tuples, but would have been worth it today!
-        private readonly (int,int)[] positions = LoadInput(file);
+        private readonly (int,int)[] vertices = LoadInput(file);
 
         private static (int,int)[] LoadInput(string file)
         {
@@ -26,18 +26,18 @@ namespace AoC2025.Days
         public string PartOne()
         {
             long maxArea = 0;
-            for (int i = 0; i < positions.Length; i++)
-                for (int j = i+1; j < positions.Length; j++)
-                    maxArea = Math.Max(maxArea, RectangleArea(positions[i], positions[j]));
+            for (int i = 0; i < vertices.Length; i++)
+                for (int j = i+1; j < vertices.Length; j++)
+                    maxArea = Math.Max(maxArea, RectangleArea(vertices[i], vertices[j]));
             return maxArea.ToString();
         }
 
         private List<(int,int,long)> GetSortedRectangles()
         {
             var distances = new List<(int,int,long)>(); // List of (corner1Index, corner2Index, distance)
-            for (int i = 0; i < positions.Length; i++)
-                for (int j = i+1; j < positions.Length; j++)
-                    distances.Add((i, j, RectangleArea(positions[i], positions[j])));
+            for (int i = 0; i < vertices.Length; i++)
+                for (int j = i+1; j < vertices.Length; j++)
+                    distances.Add((i, j, RectangleArea(vertices[i], vertices[j])));
             return distances.OrderByDescending(d=>d.Item3).ToList();
         }
 
@@ -55,17 +55,17 @@ namespace AoC2025.Days
                 throw new InvalidDataException();
         }
 
-        private (int, int) DirectionBefore(int posnIndex)
+        private (int, int) DirectionBefore(int vxIndex)
         {
-            var prevPosn = posnIndex == 0 ? positions.Last() : positions[posnIndex-1];
-            var posn = positions[posnIndex];
+            var prevPosn = vxIndex == 0 ? vertices.Last() : vertices[vxIndex-1];
+            var posn = vertices[vxIndex];
             return LineDirection(prevPosn, posn);
         }
 
-        private (int, int) DirectionAfter(int posnIndex)
+        private (int, int) DirectionAfter(int vxIndex)
         {
-            var posn = positions[posnIndex];
-            var nextPosn = positions[(posnIndex+1)%positions.Length];
+            var posn = vertices[vxIndex];
+            var nextPosn = vertices[(vxIndex+1)%vertices.Length];
             return LineDirection(posn, nextPosn);
         }
 
@@ -78,7 +78,7 @@ namespace AoC2025.Days
         {
             // returns whether vertices of polygon in input go clockwise around polygon
             var turnCount = 0;
-            for (var i = 0; i < positions.Length; i++)
+            for (var i = 0; i < vertices.Length; i++)
                 turnCount += CROSS(DirectionBefore(i), DirectionAfter(i));
 
             if (turnCount == -4)
@@ -95,17 +95,17 @@ namespace AoC2025.Days
                 && bottomLeft.Item2 < p.Item2 && p.Item2 < topRight.Item2;
         }
 
-        private bool IsInPolygon(int corner0Index, int corner1Index, Dictionary<(int, int), int> positionDict, HashSet<(int, int)> polygonEdgePts)
+        private bool IsInPolygon(int corner0Index, int corner1Index, Dictionary<(int, int), int> vxDict, HashSet<(int, int)> polygonEdgePts)
         {
             // tests whether rectangle with given opposite corners is fully within the polygon
             // method: walk anti-clockwise round the rectangle boundary, checking whether we ever leave the polygon
-            var posn1 = positions[corner0Index];
-            var posn2 = positions[corner1Index];
+            var posn1 = vertices[corner0Index];
+            var posn2 = vertices[corner1Index];
             var bottomLeft = (Math.Min(posn1.Item1, posn2.Item1), Math.Min(posn1.Item2, posn2.Item2));
             var topRight = (Math.Max(posn1.Item1, posn2.Item1), Math.Max(posn1.Item2, posn2.Item2));
 
             // quick test first: are there any polygon vertices within the rectangle?
-            foreach (var p in positions)
+            foreach (var p in vertices)
                 if (PointWithinRectangle(p, bottomLeft, topRight))
                     return false;
 
@@ -127,12 +127,12 @@ namespace AoC2025.Days
                 {
                     var nextPosn = (currPosn.Item1 + lineDirn.Item1, currPosn.Item2 + lineDirn.Item2);
 
-                    if (positionDict.ContainsKey(currPosn) && !positionDict.ContainsKey(nextPosn))
+                    if (vxDict.ContainsKey(currPosn) && !vxDict.ContainsKey(nextPosn))
                     {   // need to check if we left polygon through a vertex
                         var exited = false;
 
                         var currDirn = LineDirection(currPosn, nextPosn);
-                        var vertexIndex = positionDict[currPosn];
+                        var vertexIndex = vxDict[currPosn];
                         var polygonDirnBefore = DirectionBefore(vertexIndex);
                         var polygonDirnAfter = DirectionAfter(vertexIndex);
 
@@ -149,7 +149,7 @@ namespace AoC2025.Days
                             return false;
                     }
                     else if (polygonEdgePts.Contains(currPosn) && !polygonEdgePts.Contains(nextPosn)
-                            && !positionDict.ContainsKey(nextPosn))
+                            && !vxDict.ContainsKey(nextPosn))
                         return false; // cross polygon boundary not at vertex
                     currPosn = nextPosn;
                 }
@@ -162,10 +162,10 @@ namespace AoC2025.Days
         {
             // returns set of points that are on polyline edges but not on vertices
             var set = new HashSet<(int,int)>();
-            for (var i = 0; i < positions.Length; i++)
+            for (var i = 0; i < vertices.Length; i++)
             {
-                var lineSt = positions[i];
-                var lineNd = positions[(i+1)%positions.Length];
+                var lineSt = vertices[i];
+                var lineNd = vertices[(i+1)%vertices.Length];
                 var lineLength = RectangleArea(lineNd, lineSt);
                 var lineDirn = LineDirection(lineSt, lineNd);
                 for (var j = 1; j < lineLength-1; j++)
@@ -179,16 +179,16 @@ namespace AoC2025.Days
 
         public string PartTwo()
         {          
-            var positionDict = new Dictionary<(int,int), int>(); // maps from position to index into positions array
-            for (var i = 0; i < positions.Length; i++)
-                positionDict.Add(positions[i], i);  // will also flag if there are any repeat positions in input
+            var vxDict = new Dictionary<(int,int), int>(); // maps from position to index into positions array
+            for (var i = 0; i < vertices.Length; i++)
+                vxDict.Add(vertices[i], i);  // will also flag if there are any repeat positions in input
 
             if (PolygonIsClockwise())
                 throw new NotImplementedException(); // checked my input is anti-clockwise
 
             var polygonEdgePts = GetPolygonEdgePts();
             var rectangles = GetSortedRectangles();
-            var maxRectangle = rectangles.First(R => IsInPolygon(R.Item1, R.Item2, positionDict, polygonEdgePts));
+            var maxRectangle = rectangles.First(R => IsInPolygon(R.Item1, R.Item2, vxDict, polygonEdgePts));
 
             return maxRectangle.Item3.ToString();
         }
