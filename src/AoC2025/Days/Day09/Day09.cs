@@ -67,26 +67,9 @@ namespace AoC2025.Days
             return LineDirection(posn, nextPosn);
         }
 
-        private int TurnValue(int posnIndex)
+        private static int CROSS((int,int) dirn1, (int,int) dirn2)
         {
-            // returns -1 if vertex at posnIndex is left turn
-            //         +1 if right turn
-            //          0 if redundant vertex (middle of straight line)
-            var dirnBefore = DirectionBefore(posnIndex);
-            var dirnAfter = DirectionAfter(posnIndex);
-
-            if (dirnBefore == dirnAfter)
-                return 0;
-            else if (dirnBefore == (1,0))
-                return dirnAfter == (0,1) ? -1 : 1;
-            else if (dirnBefore == (-1,0))
-                return dirnAfter == (0,1) ? 1 : -1;
-            else if (dirnBefore == (0,1))
-                return dirnAfter == (1,0) ? 1 : -1;
-            else if (dirnBefore == (0,-1))
-                return dirnAfter == (1,0) ? -1 : 1;
-
-            throw new InvalidDataException();
+            return (dirn1.Item1 * dirn2.Item2) - (dirn1.Item2 * dirn2.Item1);
         }
 
         private bool PolygonIsClockwise()
@@ -94,18 +77,14 @@ namespace AoC2025.Days
             // returns whether vertices of polygon in input go clockwise around polygon
             var turnCount = 0;
             for (var i = 0; i < positions.Length; i++)
-                turnCount += TurnValue(i);
+                turnCount += CROSS(DirectionBefore(i), DirectionAfter(i));
 
-            if (turnCount == 4)
+            if (turnCount == -4)
                 return true;
-            else if (turnCount == -4)
+            else if (turnCount == 4)
                 return false;
-            throw new InvalidDataException();
-        }
 
-        private static int CROSS((int,int) dirn1, (int,int) dirn2)
-        {
-            return (dirn1.Item1 * dirn2.Item2) - (dirn1.Item2 * dirn2.Item1);
+            throw new InvalidDataException();
         }
 
         private bool IsInPolygon(int corner0Index, int corner1Index, Dictionary<(int, int), int> positionDict, HashSet<(int, int)> polygonEdgePts)
