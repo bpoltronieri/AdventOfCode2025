@@ -2,6 +2,8 @@ namespace AoC2025.Days
 {
     public class Day09(string file) : IDay
     {
+        // next time, use or write a class for a 2D vector.
+        // was lazy and kept using tuples, but would have been worth it today!
         private readonly (int,int)[] positions = LoadInput(file);
 
         private static (int,int)[] LoadInput(string file)
@@ -87,6 +89,12 @@ namespace AoC2025.Days
             throw new InvalidDataException();
         }
 
+        private static bool PointWithinRectangle((int, int) p, (int, int) bottomLeft, (int, int) topRight)
+        {
+            return bottomLeft.Item1 < p.Item1 && p.Item1 < topRight.Item1
+                && bottomLeft.Item2 < p.Item2 && p.Item2 < topRight.Item2;
+        }
+
         private bool IsInPolygon(int corner0Index, int corner1Index, Dictionary<(int, int), int> positionDict, HashSet<(int, int)> polygonEdgePts)
         {
             // tests whether rectangle with given opposite corners is fully within the polygon
@@ -95,6 +103,11 @@ namespace AoC2025.Days
             var posn2 = positions[corner1Index];
             var bottomLeft = (Math.Min(posn1.Item1, posn2.Item1), Math.Min(posn1.Item2, posn2.Item2));
             var topRight = (Math.Max(posn1.Item1, posn2.Item1), Math.Max(posn1.Item2, posn2.Item2));
+
+            // quick test first: are there any polygon vertices within the rectangle?
+            foreach (var p in positions)
+                if (PointWithinRectangle(p, bottomLeft, topRight))
+                    return false;
 
             var corners = new (int,int)[4]; // anti-clockwise round rectangle starting at bottom left
             corners[0] = bottomLeft;
@@ -164,8 +177,8 @@ namespace AoC2025.Days
             return set;
         }
 
-        public string PartTwo() // works but not optimised at all!
-        {
+        public string PartTwo()
+        {          
             var positionDict = new Dictionary<(int,int), int>(); // maps from position to index into positions array
             for (var i = 0; i < positions.Length; i++)
                 positionDict.Add(positions[i], i);  // will also flag if there are any repeat positions in input
@@ -176,6 +189,7 @@ namespace AoC2025.Days
             var polygonEdgePts = GetPolygonEdgePts();
             var rectangles = GetSortedRectangles();
             var maxRectangle = rectangles.First(R => IsInPolygon(R.Item1, R.Item2, positionDict, polygonEdgePts));
+
             return maxRectangle.Item3.ToString();
         }
     }
