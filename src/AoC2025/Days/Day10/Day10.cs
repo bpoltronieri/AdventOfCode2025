@@ -78,8 +78,8 @@ namespace AoC2025.Days
         private static int GetMachineMinPressesJoltages(Machine machine)
         {
             var upperBound = machine.JoltageRequirements.Sum();
-            Solver solver = Solver.CreateSolver("SCIP"); // Google Linear Optimization Package
-            
+            Solver solver = Solver.CreateSolver("SCIP"); // Solving Constraint Integer Programs
+
             var variables = new Variable[machine.NButtons];
             for (int i = 0; i < machine.NButtons; i++)
                 variables[i] = solver.MakeIntVar(0, upperBound, "b" + i.ToString());
