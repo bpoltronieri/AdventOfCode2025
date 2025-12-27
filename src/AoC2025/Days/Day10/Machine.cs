@@ -1,25 +1,20 @@
-using System.Reflection.PortableExecutable;
-
 namespace AoC2025.Days
 {
     public class Machine
     {
         private readonly string lightDiagram; // without square brackets
         private readonly char[] currentState;
-        private readonly int[] joltageRequirements;
-        private readonly int[] currentJoltages;
-        private readonly List<List<int>> buttons = [];
+        public List<List<int>> Buttons {get; private set;} = [];
+        public int[] JoltageRequirements {get; private set;}
         public int NButtons {get; private set;} = 0;
         public int NButtonPresses {get; private set;} = 0;
-        public bool JoltageMode {get; set;} = false;
 
         public Machine(string inputLightDiagram, string joltages)
         {
             lightDiagram = inputLightDiagram.TrimStart('[').TrimEnd(']');
             currentState = new char[lightDiagram.Length];
-            currentJoltages = new int[lightDiagram.Length];
             Reset();
-            joltageRequirements = joltages.TrimStart('{').TrimEnd('}').Split(',').Select(int.Parse).ToArray();
+            JoltageRequirements = joltages.TrimStart('{').TrimEnd('}').Split(',').Select(int.Parse).ToArray();
         }
 
         public void AddButton(string button)
@@ -27,7 +22,7 @@ namespace AoC2025.Days
             var newButton = button.TrimStart('(').TrimEnd(')').Split(',').Select(int.Parse).ToList();
             if (newButton.Any(i => i < 0 || i >= lightDiagram.Length))
                 throw new InvalidDataException();
-            buttons.Add(newButton);
+            Buttons.Add(newButton);
             NButtons += 1;
         }
 
@@ -35,40 +30,28 @@ namespace AoC2025.Days
         {
             NButtonPresses = 0;
             for (int i = 0; i < currentState.Length; i++)
-                {
                 currentState[i] = '.';
-                currentJoltages[i] = 0;
-                }
         }
 
         public bool IsConfigured()
         {
-            if (JoltageMode)
-                return joltageRequirements.SequenceEqual(currentJoltages);
-            else
-                return lightDiagram.SequenceEqual(currentState);
+            return lightDiagram.SequenceEqual(currentState);
         }
 
         public void PressButton(int buttonId)
         {
-            if (buttonId < 0 || buttonId >= buttons.Count)
+            if (buttonId < 0 || buttonId >= Buttons.Count)
                 throw new InvalidOperationException();
-            foreach (var i in buttons[buttonId])
+            foreach (var i in Buttons[buttonId])
             {  
-                if (JoltageMode)
-                    currentJoltages[i] += 1;
+                if (currentState[i] == '.')
+                    currentState[i] = '#';
+                else if (currentState[i] == '#')
+                    currentState[i] = '.';
                 else
-                {
-                    if (currentState[i] == '.')
-                        currentState[i] = '#';
-                    else if (currentState[i] == '#')
-                        currentState[i] = '.';
-                    else
-                        throw new InvalidProgramException();
-                }
+                    throw new InvalidProgramException();
             }
             NButtonPresses += 1;
         }
-
     }
 }

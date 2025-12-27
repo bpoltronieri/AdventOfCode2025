@@ -17,11 +17,11 @@ namespace AoC2025.Tests.Days
 
             // act
             var result1 = day.PartOne();
-            // var result2 = day.PartTwo();
+            var result2 = day.PartTwo();
 
             // assert
             Assert.Equal("7", result1);
-            // Assert.Equal("33", result2);
+            Assert.Equal("33", result2);
         }
     }
 }
